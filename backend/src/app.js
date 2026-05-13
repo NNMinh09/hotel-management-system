@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import path from "path";
+
 import authRoutes from "./routes/authRoutes.js";
 import locationRoutes from "./routes/locationRoutes.js";
 import assetRoutes from "./routes/assetRoutes.js";
@@ -17,13 +18,18 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://hotel-management-system-eta-ten.vercel.app",
+    ],
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.use("/api/auth", authRoutes);
@@ -36,6 +42,10 @@ app.use("/api/preventive-plans", preventivePlanRoutes);
 app.use("/api/import", importRoutes);
 app.use("/api/export", exportRoutes);
 
-app.get("/", (req, res) => res.json({ message: "🔧 Hotel Maintenance API running!" }));
+app.get("/", (req, res) => {
+  res.json({
+    message: "🔧 Hotel Maintenance API running!",
+  });
+});
 
 export default app;
