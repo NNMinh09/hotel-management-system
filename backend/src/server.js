@@ -9,6 +9,7 @@ import connectDB from "./config/db.js";
 const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);
 
+// Cấu hình Socket.io dùng biến CLIENT_URL nạp từ Render
 export const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -19,13 +20,11 @@ export const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log("🔌 Connected:", socket.id);
 
-  // Join theo role (admin, staff)
   socket.on("join_role", (role) => {
     socket.join(role);
     console.log(`Socket ${socket.id} joined room: ${role}`);
   });
 
-  // Join theo userId (cho technician nhận thông báo riêng)
   socket.on("join_user", (userId) => {
     socket.join(`user_${userId}`);
     console.log(`Socket ${socket.id} joined user room: user_${userId}`);
@@ -36,8 +35,9 @@ io.on("connection", (socket) => {
   });
 });
 
+// Kết nối Database và chạy Server
 connectDB().then(() => {
   httpServer.listen(PORT, () => {
-    console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
   });
 });

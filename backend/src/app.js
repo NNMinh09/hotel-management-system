@@ -16,11 +16,13 @@ import exportRoutes from "./routes/exportRoutes.js";
 
 const app = express();
 
+// Cấu hình CORS linh hoạt hơn cho môi trường Deploy
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://hotel-management-system-eta-ten.vercel.app",
+      "https://hotel-management-system-nnminh09.vercel.app", // Link Vercel của ông
+      /\.vercel\.app$/ // Cho phép tất cả các sub-domain từ Vercel (để tránh lỗi khi tạo preview)
     ],
     credentials: true,
   })
@@ -44,7 +46,8 @@ app.use("/api/export", exportRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "🔧 Hotel Maintenance API running!",
+    message: "🔧 Hotel Maintenance API is Live!",
+    status: "Healthy"
   });
 });
 
