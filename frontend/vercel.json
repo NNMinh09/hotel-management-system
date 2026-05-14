@@ -1,0 +1,13 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' *.vercel.com *.vercel-storage.com *.public.blob.vercel-storage.com *.gstatic.com vercel.live; img-src 'self' data: blob: https:; connect-src 'self' https://hotel-management-system-zwek.onrender.com wss://hotel-management-system-zwek.onrender.com"
+        }
+      ]
+    }
+  ]
+}
