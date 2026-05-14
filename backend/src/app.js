@@ -16,14 +16,30 @@ import exportRoutes from "./routes/exportRoutes.js";
 
 const app = express();
 
-// Cấu hình CORS linh hoạt hơn cho môi trường Deploy
+// ✅ Danh sách origin được phép - đồng bộ với Socket.io trong server.js
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://hotel-management-system-nnminh09.vercel.app",
+  "https://hotel-management-system-eta-ten.vercel.app",
+  /\.vercel\.app$/, // Cho phép tất cả subdomain Vercel (preview deployments)
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://hotel-management-system-nnminh09.vercel.app", // Link Vercel của ông
-      /\.vercel\.app$/ // Cho phép tất cả các sub-domain từ Vercel (để tránh lỗi khi tạo preview)
-    ],
+    origin: (origin, callback) => {
+      // Cho phép request không có origin (Postman, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const isAllowed = allowedOrigins.some((allowed) =>
+        allowed instanceof RegExp ? allowed.test(origin) : allowed === origin
+      );
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    },
     credentials: true,
   })
 );
@@ -47,7 +63,7 @@ app.use("/api/export", exportRoutes);
 app.get("/", (req, res) => {
   res.json({
     message: "🔧 Hotel Maintenance API is Live!",
-    status: "Healthy"
+    status: "Healthy",
   });
 });
 
