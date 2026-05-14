@@ -16,6 +16,15 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
+// ✅ Cấu hình cookie dùng chung — cross-origin (Vercel → Render) bắt buộc cần
+// secure: true và sameSite: "None"
+const cookieOptions = (maxAge) => ({
+  httpOnly: true,
+  secure: true,        // ✅ Bắt buộc khi dùng sameSite: "None"
+  sameSite: "None",    // ✅ Cho phép gửi cookie cross-origin
+  maxAge,
+});
+
 export const register = async (req, res) => {
   try {
     const { name, email, phone, password, role, specialization } = req.body;
@@ -28,7 +37,7 @@ export const register = async (req, res) => {
       name, email, phone,
       password: hashed,
       role: role || "staff",
-      specialization: specialization || null
+      specialization: specialization || null,
     });
 
     res.status(201).json({ message: "Tạo tài khoản thành công", userId: user._id });
@@ -53,27 +62,33 @@ export const login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: 86400000 });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 604800000 });
+    // ✅ Set cookie với đúng cấu hình cross-origin
+    res.cookie("accessToken", accessToken, cookieOptions(86400000));       // 1 ngày
+    res.cookie("refreshToken", refreshToken, cookieOptions(604800000));    // 7 ngày
 
     res.json({
       message: "Đăng nhập thành công",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 export const logout = async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user.id, { refreshToken: null });
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+
+    // ✅ clearCookie phải cùng options với lúc set (trừ maxAge)
+    res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" });
+
     res.json({ message: "Đã đăng xuất" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password -refreshToken");
