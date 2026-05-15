@@ -1,24 +1,42 @@
-﻿import React from "react";
+﻿import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 
 const navItems = [
-  { to: "/staff", label: "📣 Báo hỏng", end: true },
-  { to: "/staff/my-requests", label: "🧾 Yêu cầu của tôi" },
+  { to: "/staff", label: "Báo hỏng", icon: "📣", end: true },
+  { to: "/staff/my-requests", label: "Yêu cầu của tôi", icon: "🧾" },
 ];
 
 export default function StaffLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   return (
     <div className="flex h-screen overflow-hidden bg-zinc-950 text-white">
-      <aside className="flex w-56 flex-col border-r border-zinc-800 bg-zinc-900">
+
+      {/* ✅ Overlay mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/60 md:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-30 flex w-56 flex-col border-r border-zinc-800 bg-zinc-900
+        transform transition-transform duration-300
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        md:relative md:translate-x-0
+      `}>
         <div className="border-b border-zinc-800 px-4 py-5">
           <h1 className="text-sm font-black">
             MAINTAIN<span className="text-amber-500">PRO</span>
@@ -27,11 +45,12 @@ export default function StaffLayout() {
         </div>
 
         <nav className="flex-1 space-y-1 p-3">
-          {navItems.map(({ to, label, end }) => (
+          {navItems.map(({ to, label, icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
+              onClick={closeSidebar} // ✅ Đóng sidebar khi bấm menu
               className={({ isActive }) =>
                 `block rounded-lg border px-3 py-2.5 text-sm transition-all ${
                   isActive
@@ -40,7 +59,7 @@ export default function StaffLayout() {
                 }`
               }
             >
-              {label}
+              {icon} {label}
             </NavLink>
           ))}
         </nav>
@@ -57,9 +76,27 @@ export default function StaffLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto bg-zinc-950 p-6">
-        <Outlet />
-      </main>
+      {/* Main */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+
+        {/* ✅ Topbar mobile */}
+        <header className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-3 md:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="text-zinc-400 hover:text-white text-2xl"
+          >
+            ☰
+          </button>
+          <h1 className="text-sm font-black">
+            MAINTAIN<span className="text-amber-500">PRO</span>
+          </h1>
+          <span className="text-xs text-zinc-500">{user?.name}</span>
+        </header>
+
+        <main className="flex-1 overflow-auto bg-zinc-950 p-4 md:p-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
