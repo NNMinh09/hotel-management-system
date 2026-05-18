@@ -30,6 +30,12 @@ export default function AdminLocations() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  // ✅ Phân trang
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(locations.length / PAGE_SIZE);
+  const pagedLocations = locations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const loadLocations = async () => {
     setLoading(true);
     try {
@@ -218,42 +224,61 @@ export default function AdminLocations() {
               Chưa có vị trí nào. Bạn thêm vị trí đầu tiên ở form bên trái.
             </div>
           ) : (
-            <div className="space-y-3">
-              {locations.map((location) => {
-                const status = location.status || "active";
-                return (
-                  <div key={location._id} className="flex items-start justify-between gap-4 rounded-xl border border-zinc-700 bg-zinc-800/60 p-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium text-white">{location.name}</p>
-                        <span className={`rounded-full border px-2 py-0.5 text-xs ${STATUS_CLASS[status] || STATUS_CLASS.active}`}>
-                          {STATUS_LABEL[status] || status}
-                        </span>
+            <>
+              <div className="space-y-3">
+                {pagedLocations.map((location) => {
+                  const status = location.status || "active";
+                  return (
+                    <div key={location._id} className="flex items-start justify-between gap-4 rounded-xl border border-zinc-700 bg-zinc-800/60 p-4">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-medium text-white">{location.name}</p>
+                          <span className={`rounded-full border px-2 py-0.5 text-xs ${STATUS_CLASS[status] || STATUS_CLASS.active}`}>
+                            {STATUS_LABEL[status] || status}
+                          </span>
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-3 text-sm text-zinc-500">
+                          <span>Loại: {LOCATION_TYPE_LABEL[location.type] || location.type}</span>
+                          <span>Tầng: {location.floor ?? "-"}</span>
+                        </div>
+                        {location.notes && <p className="mt-2 text-sm text-zinc-400">{location.notes}</p>}
                       </div>
-                      <div className="mt-1 flex flex-wrap gap-3 text-sm text-zinc-500">
-                        <span>Loại: {LOCATION_TYPE_LABEL[location.type] || location.type}</span>
-                        <span>Tầng: {location.floor ?? "-"}</span>
+                      <div className="flex shrink-0 flex-col gap-2">
+                        <button
+                          onClick={() => handleEdit(location)}
+                          className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-400 hover:bg-amber-500/20"
+                        >
+                          Sửa
+                        </button>
+                        <button
+                          onClick={() => handleDelete(location._id)}
+                          className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400 hover:bg-red-500/20"
+                        >
+                          Xóa
+                        </button>
                       </div>
-                      {location.notes && <p className="mt-2 text-sm text-zinc-400">{location.notes}</p>}
                     </div>
-                    <div className="flex shrink-0 flex-col gap-2">
-                      <button
-                        onClick={() => handleEdit(location)}
-                        className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-400 hover:bg-amber-500/20"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDelete(location._id)}
-                        className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400 hover:bg-red-500/20"
-                      >
-                        Xóa
-                      </button>
-                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ✅ Phân trang */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 mt-2 border-t border-zinc-800">
+                  <p className="text-xs text-zinc-500">Trang {page} / {totalPages} ({locations.length} vị trí)</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+                      className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 disabled:opacity-40 hover:bg-zinc-800">
+                      ← Trước
+                    </button>
+                    <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                      className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 disabled:opacity-40 hover:bg-zinc-800">
+                      Sau →
+                    </button>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

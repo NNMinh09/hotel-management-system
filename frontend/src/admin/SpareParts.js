@@ -22,6 +22,12 @@ export default function AdminSpareParts() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  // ✅ Phân trang
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(parts.length / PAGE_SIZE);
+  const pagedParts = parts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const loadParts = async () => {
     setLoading(true);
     try {
@@ -187,33 +193,52 @@ export default function AdminSpareParts() {
               Chưa có linh kiện nào. Thêm ở form bên trái.
             </div>
           ) : (
-            <div className="space-y-3">
-              {parts.map((part) => {
-                const isLow = part.quantity <= part.minQuantity;
-                return (
-                  <div key={part._id} className={`flex items-start justify-between gap-4 rounded-xl border p-4 ${isLow ? "border-red-500/20 bg-red-500/5" : "border-zinc-700 bg-zinc-800/60"}`}>
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium text-white">{part.name}</p>
-                        {isLow && <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs text-red-400">⚠️ Sắp hết</span>}
+            <>
+              <div className="space-y-3">
+                {pagedParts.map((part) => {
+                  const isLow = part.quantity <= part.minQuantity;
+                  return (
+                    <div key={part._id} className={`flex items-start justify-between gap-4 rounded-xl border p-4 ${isLow ? "border-red-500/20 bg-red-500/5" : "border-zinc-700 bg-zinc-800/60"}`}>
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-medium text-white">{part.name}</p>
+                          {isLow && <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs text-red-400">⚠️ Sắp hết</span>}
+                        </div>
+                        <p className="mt-0.5 text-xs text-zinc-500">{part.code} • {part.category}</p>
+                        <div className="mt-2 flex flex-wrap gap-4 text-sm">
+                          <span className={isLow ? "font-bold text-red-400" : "font-bold text-white"}>{part.quantity} {part.unit}</span>
+                          <span className="text-zinc-500">Tối thiểu: {part.minQuantity}</span>
+                          <span className="text-zinc-500">{(part.unitPrice || 0).toLocaleString("vi-VN")}đ/{part.unit}</span>
+                        </div>
+                        {part.supplier && <p className="mt-1 text-xs text-zinc-500">NCC: {part.supplier}</p>}
+                        {part.notes && <p className="mt-1 text-xs text-zinc-600">{part.notes}</p>}
                       </div>
-                      <p className="mt-0.5 text-xs text-zinc-500">{part.code} • {part.category}</p>
-                      <div className="mt-2 flex flex-wrap gap-4 text-sm">
-                        <span className={isLow ? "font-bold text-red-400" : "font-bold text-white"}>{part.quantity} {part.unit}</span>
-                        <span className="text-zinc-500">Tối thiểu: {part.minQuantity}</span>
-                        <span className="text-zinc-500">{(part.unitPrice || 0).toLocaleString("vi-VN")}đ/{part.unit}</span>
+                      <div className="flex shrink-0 flex-col gap-2">
+                        <button onClick={() => handleEdit(part)} className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-400 hover:bg-amber-500/20">Sửa</button>
+                        <button onClick={() => handleDelete(part._id)} className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400 hover:bg-red-500/20">Xóa</button>
                       </div>
-                      {part.supplier && <p className="mt-1 text-xs text-zinc-500">NCC: {part.supplier}</p>}
-                      {part.notes && <p className="mt-1 text-xs text-zinc-600">{part.notes}</p>}
                     </div>
-                    <div className="flex shrink-0 flex-col gap-2">
-                      <button onClick={() => handleEdit(part)} className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-400 hover:bg-amber-500/20">Sửa</button>
-                      <button onClick={() => handleDelete(part._id)} className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400 hover:bg-red-500/20">Xóa</button>
-                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ✅ Phân trang */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 mt-2 border-t border-zinc-800">
+                  <p className="text-xs text-zinc-500">Trang {page} / {totalPages} ({parts.length} linh kiện)</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+                      className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 disabled:opacity-40 hover:bg-zinc-800">
+                      ← Trước
+                    </button>
+                    <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                      className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 disabled:opacity-40 hover:bg-zinc-800">
+                      Sau →
+                    </button>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

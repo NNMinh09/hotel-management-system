@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { maintenanceService, authService, locationService, assetService } from "../services";
 
 const STATUS_LABEL = {
@@ -69,6 +69,12 @@ export default function AdminRequests() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+
+  // ✅ Phân trang
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(requests.length / PAGE_SIZE);
+  const pagedRequests = requests.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const fetchRequests = () => {
     setLoading(true);
@@ -226,7 +232,8 @@ export default function AdminRequests() {
         )}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900">
+      {/* ✅ Desktop: Table */}
+      <div className="hidden md:block overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900">
         {loading ? (
           <p className="py-12 text-center text-sm text-zinc-500">Đang tải...</p>
         ) : requests.length === 0 ? (
@@ -247,7 +254,7 @@ export default function AdminRequests() {
               </tr>
             </thead>
             <tbody>
-              {requests.map((request) => (
+              {pagedRequests.map((request) => (
                 <tr key={request._id} className="border-b border-zinc-800/50 transition-colors hover:bg-zinc-800/30">
                   <td className="px-5 py-4">
                     <p className="font-medium text-white">{request.title}</p>
@@ -310,6 +317,72 @@ export default function AdminRequests() {
           </table>
         )}
       </div>
+
+      {/* ✅ Mobile: Card layout */}
+      {!loading && requests.length > 0 && (
+        <div className="md:hidden space-y-3">
+          {pagedRequests.map((request) => (
+            <div key={request._id} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <p className="font-bold text-white text-sm">{request.title}</p>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    {request.type === "scheduled" ? "📅 Định kỳ" : request.type === "inspection" ? "🔍 Kiểm tra" : "🔧 Sửa chữa"}
+                    {" · "}{request.locationId?.name}
+                  </p>
+                </div>
+                <span className={`rounded-full px-2 py-1 text-xs shrink-0 ${PRIORITY_COLOR[request.priority]}`}>
+                  {PRIORITY_LABEL[request.priority]}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-1 border-t border-zinc-800">
+                <span className={`rounded-full px-2 py-1 text-xs ${STATUS_COLOR[request.status]}`}>
+                  {STATUS_LABEL[request.status]}
+                </span>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowDetailModal(request)} className="text-xs text-zinc-400 underline transition-colors hover:text-white">Chi tiết</button>
+                  {request.status === "pending" && (
+                    <button onClick={() => { setShowAssignModal(request); setAssignTech(""); setAssignNote(""); }}
+                      className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-2 py-1 text-xs text-blue-400 transition-colors hover:bg-blue-500/20">
+                      Phân công
+                    </button>
+                  )}
+                  {request.status === "completed" && (
+                    <button onClick={() => handleClose(request)}
+                      className="rounded-lg border border-green-500/20 bg-green-500/10 px-2 py-1 text-xs text-green-400 transition-colors hover:bg-green-500/20">
+                      Đóng phiếu
+                    </button>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-zinc-500">KTV: {request.assignedTo?.name || "Chưa giao"} · Báo bởi: {request.reportedBy?.name}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      {!loading && requests.length === 0 && (
+        <div className="md:hidden py-12 text-center rounded-2xl border border-zinc-800 bg-zinc-900">
+          <p className="mb-3 text-4xl">📋</p>
+          <p className="text-sm text-zinc-400">Không có phiếu nào</p>
+        </div>
+      )}
+
+      {/* ✅ Phân trang */}
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-xs text-zinc-500">Trang {page} / {totalPages} ({requests.length} phiếu)</p>
+          <div className="flex gap-2">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+              className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 disabled:opacity-40 hover:bg-zinc-800">
+              ← Trước
+            </button>
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+              className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 disabled:opacity-40 hover:bg-zinc-800">
+              Sau →
+            </button>
+          </div>
+        </div>
+      )}
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
