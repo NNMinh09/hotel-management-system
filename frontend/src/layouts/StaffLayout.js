@@ -4,9 +4,18 @@ import useAuthStore from "../store/authStore";
 import useThemeStore from "../store/themeStore";
 
 const navItems = [
-  { to: "/staff", label: "Báo hỏng", icon: "📣", end: true },
-  { to: "/staff/my-requests", label: "Yêu cầu của tôi", icon: "🧾" },
+  { to: "/staff", label: "Báo hỏng", icon: "◈", end: true },
+  { to: "/staff/my-requests", label: "Yêu cầu của tôi", icon: "◉" },
 ];
+
+function Avatar({ name }) {
+  const initials = (name || "NV").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-black text-white shadow-lg shadow-blue-500/20">
+      {initials}
+    </div>
+  );
+}
 
 export default function StaffLayout() {
   const { user, logout } = useAuthStore();
@@ -24,87 +33,120 @@ export default function StaffLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-zinc-950 text-white">
 
-      {/* ✅ Overlay mobile */}
+      {/* Overlay mobile */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/60 md:hidden"
-          onClick={closeSidebar}
-        />
+        <div className="fixed inset-0 z-20 bg-black/70 backdrop-blur-sm md:hidden" onClick={closeSidebar} />
       )}
 
-      {/* Sidebar */}
+      {/* ── SIDEBAR ── */}
       <aside className={`
-        fixed inset-y-0 left-0 z-30 flex w-56 flex-col border-r border-zinc-800 bg-zinc-900
-        transform transition-transform duration-300
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        md:relative md:translate-x-0
+        fixed inset-y-0 left-0 z-30 flex w-56 flex-col
+        bg-zinc-900 border-r border-zinc-800/80
+        transform transition-all duration-300 ease-in-out
+        ${sidebarOpen ? "translate-x-0 shadow-2xl shadow-black/50" : "-translate-x-full"}
+        md:relative md:translate-x-0 md:shadow-none
       `}>
-        <div className="border-b border-zinc-800 px-4 py-5">
-          <h1 className="text-sm font-black">
-            MAINTAIN<span className="text-amber-500">PRO</span>
-          </h1>
-          <p className="mt-0.5 text-xs text-zinc-500">Nhân viên</p>
+
+        {/* Logo */}
+        <div className="flex items-center gap-3 border-b border-zinc-800/80 px-4 py-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30">
+            <span className="text-sm font-black text-zinc-950">M</span>
+          </div>
+          <div>
+            <h1 className="text-xs font-black tracking-tight text-white">
+              MAINTAIN<span className="text-amber-400">PRO</span>
+            </h1>
+            <p className="text-[10px] text-zinc-500 tracking-widest uppercase">Nhân viên</p>
+          </div>
         </div>
 
-        <nav className="flex-1 space-y-1 p-3">
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5">
+          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">Menu</p>
           {navItems.map(({ to, label, icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
-              onClick={closeSidebar} // ✅ Đóng sidebar khi bấm menu
+              onClick={closeSidebar}
               className={({ isActive }) =>
-                `block rounded-lg border px-3 py-2.5 text-sm transition-all ${
+                `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
-                    : "border-transparent text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    ? "bg-amber-500/10 text-amber-400"
+                    : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200"
                 }`
               }
             >
-              {icon} {label}
+              {({ isActive }) => (
+                <>
+                  {isActive && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-amber-400" />}
+                  <span className={`text-base ${isActive ? "text-amber-400" : "text-zinc-500"}`}>{icon}</span>
+                  <span>{label}</span>
+                  {isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-amber-400" />}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="border-t border-zinc-800 p-4">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-sm font-medium text-white">{user?.name || "Nhân viên"}</p>
-            {/* ✅ Nút chuyển Dark/Light mode */}
+        {/* User section */}
+        <div className="border-t border-zinc-800/80 p-3">
+          <div className="mb-2 flex items-center gap-3 rounded-xl bg-zinc-800/50 px-3 py-2.5">
+            <Avatar name={user?.name} />
+            <div className="flex-1 overflow-hidden">
+              <p className="truncate text-xs font-semibold text-white">{user?.name || "Nhân viên"}</p>
+              <p className="text-[10px] uppercase tracking-wider text-zinc-500">Nhân viên</p>
+            </div>
             <button
               onClick={toggleTheme}
-              className="rounded-lg border border-zinc-700 px-2 py-1 text-sm hover:bg-zinc-800 transition-all"
-              title={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-700 text-sm transition-all hover:border-amber-500/50 hover:bg-zinc-700"
             >
               {theme === "dark" ? "☀️" : "🌙"}
             </button>
           </div>
-          <p className="mb-3 text-xs text-zinc-500">Nhân viên</p>
           <button
             onClick={handleLogout}
-            className="w-full text-xs text-zinc-500 transition-colors hover:text-red-400"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 py-2 text-xs font-medium text-red-400 transition-all hover:border-red-500/40 hover:bg-red-500/10"
           >
-            ← Đăng xuất
+            <span>←</span> Đăng xuất
           </button>
         </div>
       </aside>
 
-      {/* Main */}
+      {/* ── MAIN ── */}
       <div className="flex flex-1 flex-col overflow-hidden">
 
-        {/* ✅ Topbar mobile */}
-        <header className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-3 md:hidden">
+        {/* Topbar */}
+        <header className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-900/80 px-4 py-3 backdrop-blur-sm">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-zinc-400 hover:text-white text-2xl"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 text-zinc-400 transition-all hover:border-zinc-700 hover:bg-zinc-800 hover:text-white md:hidden"
           >
-            ☰
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M2 4h12M2 8h12M2 12h12"/>
+            </svg>
           </button>
-          <h1 className="text-sm font-black">
-            MAINTAIN<span className="text-amber-500">PRO</span>
+
+          <h1 className="text-sm font-black text-white md:hidden">
+            MAINTAIN<span className="text-amber-400">PRO</span>
           </h1>
+
+          <div className="hidden md:block">
+            <h2 className="text-sm font-semibold text-white">Nhân viên</h2>
+            <p className="text-xs text-zinc-500">Hotel Maintenance System</p>
+          </div>
+
           <div className="flex items-center gap-2">
-            <button onClick={toggleTheme} className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</button>
-            <span className="text-xs text-zinc-500">{user?.name}</span>
+            <button
+              onClick={toggleTheme}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 text-sm transition-all hover:border-zinc-700 hover:bg-zinc-800"
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+            <div className="hidden items-center gap-2 md:flex">
+              <Avatar name={user?.name} />
+              <span className="text-xs text-zinc-400">{user?.name}</span>
+            </div>
           </div>
         </header>
 
