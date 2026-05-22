@@ -1,3 +1,60 @@
 ﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* =============================================
+   🌙 DARK MODE (mặc định) — không cần override
+   ☀️ LIGHT MODE — override toàn bộ màu zinc
+   ============================================= */
+
+html.light {
+  /* Backgrounds */
+  --tw-bg-opacity: 1;
+}
+
+/* Nền chính */
+html.light .bg-zinc-950 { background-color: #f1f5f9 !important; }
+html.light .bg-zinc-900 { background-color: #ffffff !important; }
+html.light .bg-zinc-800 { background-color: #f1f5f9 !important; }
+html.light .bg-zinc-800\/60 { background-color: rgba(241,245,249,0.6) !important; }
+html.light .bg-zinc-800\/30 { background-color: rgba(241,245,249,0.3) !important; }
+
+/* Border */
+html.light .border-zinc-800 { border-color: #e2e8f0 !important; }
+html.light .border-zinc-800\/50 { border-color: rgba(226,232,240,0.5) !important; }
+html.light .border-zinc-700 { border-color: #cbd5e1 !important; }
+
+/* Text */
+html.light .text-white { color: #0f172a !important; }
+html.light .text-zinc-400 { color: #475569 !important; }
+html.light .text-zinc-500 { color: #64748b !important; }
+html.light .text-zinc-600 { color: #94a3b8 !important; }
+html.light .text-zinc-300 { color: #334155 !important; }
+
+/* Hover states */
+html.light .hover\:bg-zinc-800:hover { background-color: #e2e8f0 !important; }
+html.light .hover\:bg-zinc-700:hover { background-color: #cbd5e1 !important; }
+html.light .hover\:text-white:hover { color: #0f172a !important; }
+
+/* Input / Select / Textarea */
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Scrollbar light mode */
+html.light ::-webkit-scrollbar { width: 6px; height: 6px; }
+html.light ::-webkit-scrollbar-track { background: #f1f5f9; }
+html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* Scrollbar dark mode */
+html.dark ::-webkit-scrollbar { width: 6px; height: 6px; }
+html.dark ::-webkit-scrollbar-track { background: #18181b; }
+html.dark ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }

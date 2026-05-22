@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import useAuthStore from "./store/authStore";
+import useThemeStore from "./store/themeStore";
 
 // Import các Layouts
 import AdminLayout from "./layouts/AdminLayout";
@@ -58,9 +59,16 @@ function RoleRedirect() {
 
 
 export default function App() {
-  const { initialize, authReady } = useAuthStore(); 
+  const { initialize, authReady } = useAuthStore();
+  const { theme } = useThemeStore();
+
+  // ✅ Áp dụng class theme lên <html> để CSS override hoạt động
   useEffect(() => {
-    initialize(); 
+    document.documentElement.className = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    initialize();
   }, [initialize]);
 
   

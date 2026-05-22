@@ -1,6 +1,7 @@
 ﻿import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
+import useThemeStore from "../store/themeStore";
 
 const navItems = [
   { to: "/staff", label: "Báo hỏng", icon: "📣", end: true },
@@ -11,6 +12,7 @@ export default function StaffLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { theme, toggleTheme } = useThemeStore();
 
   const handleLogout = async () => {
     await logout();
@@ -65,7 +67,17 @@ export default function StaffLayout() {
         </nav>
 
         <div className="border-t border-zinc-800 p-4">
-          <p className="text-sm font-medium text-white">{user?.name || "Nhân viên"}</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-sm font-medium text-white">{user?.name || "Nhân viên"}</p>
+            {/* ✅ Nút chuyển Dark/Light mode */}
+            <button
+              onClick={toggleTheme}
+              className="rounded-lg border border-zinc-700 px-2 py-1 text-sm hover:bg-zinc-800 transition-all"
+              title={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+          </div>
           <p className="mb-3 text-xs text-zinc-500">Nhân viên</p>
           <button
             onClick={handleLogout}
@@ -90,7 +102,10 @@ export default function StaffLayout() {
           <h1 className="text-sm font-black">
             MAINTAIN<span className="text-amber-500">PRO</span>
           </h1>
-          <span className="text-xs text-zinc-500">{user?.name}</span>
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</button>
+            <span className="text-xs text-zinc-500">{user?.name}</span>
+          </div>
         </header>
 
         <main className="flex-1 overflow-auto bg-zinc-950 p-4 md:p-6">

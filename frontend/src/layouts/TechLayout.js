@@ -1,10 +1,12 @@
 import React from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
+import useThemeStore from "../store/themeStore";
 
 export default function TechLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useThemeStore();
 
   return (
     <div className="flex h-screen bg-zinc-950 text-white overflow-hidden">
@@ -32,7 +34,17 @@ export default function TechLayout() {
         </nav>
 
         <div className="p-4 border-t border-zinc-800">
-          <p className="text-white text-sm font-medium">{user?.name}</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-white text-sm font-medium">{user?.name}</p>
+            {/* ✅ Nút chuyển Dark/Light mode */}
+            <button
+              onClick={toggleTheme}
+              className="rounded-lg border border-zinc-700 px-2 py-1 text-sm hover:bg-zinc-800 transition-all"
+              title={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+          </div>
           <p className="text-zinc-500 text-xs mb-3">Kỹ thuật viên</p>
           <button onClick={async () => { await logout(); navigate("/login"); }}
             className="w-full text-xs text-zinc-500 hover:text-red-400 transition-colors">
@@ -50,6 +62,7 @@ export default function TechLayout() {
             MAINTAIN<span className="text-amber-500">PRO</span>
           </h1>
           <div className="flex items-center gap-3">
+            <button onClick={toggleTheme} className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</button>
             <span className="text-zinc-400 text-xs">{user?.name}</span>
             <button onClick={async () => { await logout(); navigate("/login"); }}
               className="text-xs text-zinc-500 hover:text-red-400 transition-colors">

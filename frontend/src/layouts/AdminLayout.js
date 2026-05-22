@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
+import useThemeStore from "../store/themeStore";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: "📊", end: true },
@@ -15,6 +16,7 @@ export default function AdminLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { theme, toggleTheme } = useThemeStore();
 
   const handleLogout = async () => {
     await logout();
@@ -66,9 +68,19 @@ export default function AdminLayout() {
         </nav>
 
         <div className="border-t border-zinc-800 p-4">
-          <div className="mb-4 px-2">
-            <p className="truncate text-sm font-bold text-white">{user?.name || "Admin"}</p>
-            <p className="text-xs uppercase text-zinc-500">{user?.role || "admin"}</p>
+          <div className="mb-3 px-2 flex items-center justify-between">
+            <div>
+              <p className="truncate text-sm font-bold text-white">{user?.name || "Admin"}</p>
+              <p className="text-xs uppercase text-zinc-500">{user?.role || "admin"}</p>
+            </div>
+            {/* ✅ Nút chuyển Dark/Light mode */}
+            <button
+              onClick={toggleTheme}
+              className="rounded-lg border border-zinc-700 px-2 py-1.5 text-sm transition-all hover:bg-zinc-800"
+              title={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
           </div>
           <button
             onClick={handleLogout}
@@ -91,7 +103,12 @@ export default function AdminLayout() {
             ☰
           </button>
           <h1 className="text-sm font-black text-amber-500">MAINTAIN PRO</h1>
-          <span className="text-xs text-zinc-500">{user?.name}</span>
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="text-sm" title={theme === "dark" ? "Sáng" : "Tối"}>
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+            <span className="text-xs text-zinc-500">{user?.name}</span>
+          </div>
         </header>
 
         <main className="flex-1 overflow-auto p-4 md:p-8">
