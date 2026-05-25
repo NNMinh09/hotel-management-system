@@ -16,6 +16,15 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
+// ✅ Cấu hình cookie dùng chung — cross-origin (Vercel → Render) bắt buộc cần
+// secure: true và sameSite: "None"
+const cookieOptions = (maxAge) => ({
+  httpOnly: true,
+  secure: true,        // ✅ Bắt buộc khi dùng sameSite: "None"
+  sameSite: "None",    // ✅ Cho phép gửi cookie cross-origin
+  maxAge,
+});
+
 export const register = async (req, res) => {
   try {
     const { name, email, phone, password, role, specialization } = req.body;
@@ -41,7 +50,16 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // ✅ Cho phép đăng nhập bằng username (phần trước @) hoặc email đầy đủ
+    // VD: "admin" sẽ khớp với "admin@hotel.com"
+    let user;
+    if (email.includes("@")) {
+      user = await User.findOne({ email: email.toLowerCase().trim() });
+    } else {
+      user = await User.findOne({
+        email: { $regex: "^" + email.trim() + "@", $options: "i" }
+      });
+    }
     if (!user || !user.isActive)
       return res.status(401).json({ message: "Tài khoản không tồn tại hoặc bị khóa" });
 
@@ -53,12 +71,12 @@ export const login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    // ✅ Trả token về response body thay vì cookie
-    // → Hoạt động trên mọi trình duyệt kể cả iOS Safari
+    // ✅ Set cookie với đúng cấu hình cross-origin
+    res.cookie("accessToken", accessToken, cookieOptions(86400000));       // 1 ngày
+    res.cookie("refreshToken", refreshToken, cookieOptions(604800000));    // 7 ngày
+
     res.json({
       message: "Đăng nhập thành công",
-      accessToken,
-      refreshToken,
       user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
@@ -69,6 +87,11 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user.id, { refreshToken: null });
+
+    // ✅ clearCookie phải cùng options với lúc set (trừ maxAge)
+    res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" });
+
     res.json({ message: "Đã đăng xuất" });
   } catch (err) {
     res.status(500).json({ message: err.message });

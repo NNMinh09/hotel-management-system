@@ -131,18 +131,18 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
             {/* Email */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-zinc-500">Email</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-zinc-500">Tên đăng nhập</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">◉</span>
                 <input
-                  type="email"
+                  type="text"
                   name="email"
-                  autoComplete="email"
+                  autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLocked}
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-3 pl-9 pr-4 text-sm text-white placeholder-zinc-700 transition-all focus:border-amber-500/50 focus:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-500/10 disabled:opacity-50"
-                  placeholder="admin@hotel.com"
+                  placeholder="admin hoặc admin@hotel.com"
                   required
                 />
               </div>
